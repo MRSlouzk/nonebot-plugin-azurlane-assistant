@@ -28,5 +28,6 @@ jobs:
         .
     - name: Publish distribution 📦 to PyPI
       if: startsWith(github.ref, 'refs/tags')
-      run: >-
-          python -m poetry publish --build -u "__token__" -p ${{ secrets.PYPI_SECRET }}
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_SECRET }}
