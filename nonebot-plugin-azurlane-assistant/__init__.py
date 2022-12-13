@@ -1,4 +1,6 @@
 # Python Script Created by MRS
+name = "nonebot-plugin-azurlane-assistant"
+
 from nonebot import on_regex, on_message, on_keyword, on_command
 from nonebot.matcher import Matcher
 from nonebot.adapters.onebot.v11 import Message, MessageSegment, Event, MessageEvent, GroupMessageEvent
