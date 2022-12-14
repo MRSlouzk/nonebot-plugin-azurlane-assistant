@@ -7,7 +7,7 @@ async def build_simulate(
         *args,
         times: int = 1
     )-> List[dict]:
-    with open("./data/azurlane/pool.json", "r", encoding="utf-8") as f:
+    with open("./data/azurlane/data/pool.json", "r", encoding="utf-8") as f:
         cot = json.load(f)
     che_lst: dict = cot["data"][pool_type]
     quality_lst = []
