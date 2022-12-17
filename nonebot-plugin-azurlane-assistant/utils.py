@@ -2,11 +2,9 @@
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, PrivateMessageEvent
 from typing import List
 
-# Python Script Created by MRS
 import requests as rq
-from requests import Session
 
-from .config import config
+from config import config
 async def parse(resp: rq.Response) -> dict | str | bytes:
     header = resp.headers.get("content-type")
     if("html" in header):
@@ -37,7 +35,7 @@ async def get_content(
     :return:页面内容
     """
     if(proxies is not None):
-        resp = rq.get(url, timeout=timeout, proxies=proxies)
+        resp = rq.get(url, timeout=timeout, proxies=proxies, verify=False)
     else:
         resp = rq.get(url, timeout=timeout)
     return (await parse(resp))
