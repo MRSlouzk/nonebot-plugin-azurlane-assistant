@@ -38,7 +38,7 @@ async def update_res():
         print(jh)
         for items in jh.values():
             name = items["name"]
-            url = "https://github.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/blob/main/img/jinghao_rank/" + name
+            url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
             img = await get_content(url)
             with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
                 f.write(img)

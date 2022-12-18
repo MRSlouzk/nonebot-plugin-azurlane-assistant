@@ -12,10 +12,10 @@ async def japan_ship(
     """
     with open("./data/azurlane/data/japan_ship_name.json", "r", encoding="utf-8") as f:
         cot: dict = json.load(f)
-    if(cot.get(name) is None):
+    if(cot.get(name) is not None):
         return (name, cot.get(name)["ori"], cot.get(name)["pinyin"])
     else:
-        for v in cot.values():
-            if(v["ori"] == name):
-                return (v["name"], v["ori"], v["pinyin"])
+        for v in cot.keys():
+            if(cot.get(v)["ori"] == name):
+                return (v, cot.get(v)["ori"], cot.get(v)["pinyin"])
         raise Exception("未找到该船名信息")
