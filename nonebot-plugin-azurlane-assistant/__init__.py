@@ -3,13 +3,15 @@ name = "nonebot-plugin-azurlane-assistant"
 
 from nonebot import on_command, get_driver
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import Message, MessageEvent
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
 from nonebot.log import logger
 
 from .modules import build_simulator as bs
 from .modules.utils import *
 from .modules.japan_ship_contrast import japan_ship
+from .modules.jinghao import find_jinghao_img
+
 from .check_resources import update_res
 
 driver = get_driver()
@@ -31,7 +33,18 @@ async def _():
 async def _(matcher: Matcher ,arg: Message = CommandArg()):
     args = arg.extract_plain_text().split()
     if(len(args)==0):
-        await matcher.finish("")
+        await matcher.finish("请输入>>井号榜 help<<查看具体用法")
+    elif(len(args) == 1):
+        if(args[0] == "help"):
+            await matcher.finish("")
+        else:
+            try:
+                img = await find_jinghao_img(args[0])
+                await matcher.finish(MessageSegment.image(img))
+            except Exception as e:
+                await matcher.finish(str(e))
+    else:
+        await matcher.finish("参数错误,请输入>>井号榜 help<<查看具体用法")
 
 @on_command("模拟建造").handle()
 async def _(bot: Bot, event: MessageEvent,matcher: Matcher ,arg: Message = CommandArg()):
@@ -96,6 +109,6 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
             info: tuple = await japan_ship(args[0])
         except Exception as e:
             await matcher.finish(str(e))
-        await matcher.finish("和谐名:{},中文原名:{},日文拼音:{}".format(info[0], info[1], info[2]))
+        await matcher.finish("和谐名:{},中文原名:{},和谐名拼音:{}".format(info[0], info[1], info[2]))
     else:
         await matcher.finish("参数格式错误,请重新输入")
