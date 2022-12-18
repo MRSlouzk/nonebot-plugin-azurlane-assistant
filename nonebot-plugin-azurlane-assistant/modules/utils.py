@@ -1,11 +1,11 @@
 # Python Script Created by MRS
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, PrivateMessageEvent
-from typing import List
+from typing import List, Union
 
-import requests as rq
+import httpx as hx
 
-from config import config
-async def parse(resp: rq.Response) -> dict | str | bytes:
+from ..config import config
+async def parse(resp: hx.Response, *args, option_type: str = "str") -> Union[dict, str, bytes]:
     header = resp.headers.get("content-type")
     if("html" in header):
         resp.encoding="utf-8"
@@ -16,29 +16,46 @@ async def parse(resp: rq.Response) -> dict | str | bytes:
     elif ("image" in header):
         return resp.content
     else:
-        resp.encoding="utf-8"
-        return resp.text
+        if(option_type == "str"):
+            resp.encoding="utf-8"
+            return resp.text
+        elif(option_type == "img"):
+            return resp.content
+        elif(option_type == "json"):
+            resp.encoding="utf-8"
+            return resp.json()
+        else:
+            return resp.text
 
 async def get_content(
         url: str,
         *args,
         timeout: int = 10,
         proxies: dict = None,
+        wanted_type: str = "str",
         **kwargs
-) -> dict | str | bytes:
+) -> Union[dict, str, bytes]:
     """
     获取页面
 
+    :param wanted_type: 需求的类型
     :param url:链接
     :param timeout:超时时间
     :param proxies: 代理
     :return:页面内容
     """
     if(proxies is not None):
-        resp = rq.get(url, timeout=timeout, proxies=proxies, verify=False)
+        resp = hx.get(url, timeout=timeout, proxies=proxies, verify=False)
     else:
-        resp = rq.get(url, timeout=timeout)
-    return (await parse(resp))
+        if(config.az_proxy is not None):
+            proxy = {
+                "http://": config.az_proxy,
+                "https://": config.az_proxy
+            }
+            resp = hx.get(url, timeout=timeout, proxies=proxy, verify=False)
+        else:
+            resp = hx.get(url, timeout=timeout)
+    return (await parse(resp, option_type=wanted_type))
 
 async def send_forward_msg(
         bot: Bot,
