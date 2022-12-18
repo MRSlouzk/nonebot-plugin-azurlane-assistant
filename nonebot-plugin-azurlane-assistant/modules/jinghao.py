@@ -1,8 +1,9 @@
 # Python Script Created by MRS
 import json
+from typing import List, Tuple
 
+data_path = "./data/azurlane/data/jinghao_rank.json"
 async def find_jinghao_img(num: str) -> bytes:
-    data_path = "./data/azurlane/data/jinghao_rank.json"
     img_path = "./data/azurlane/img/"
     with open(data_path, "r", encoding="utf-8") as f:
         cot: dict = json.load(f)
@@ -16,3 +17,15 @@ async def find_jinghao_img(num: str) -> bytes:
         except FileNotFoundError:
             raise Exception("资源读取失败,请确认是否成功下载所需资源")
         return img
+
+async def get_mapping_jh() -> List[Tuple[str, str]]:
+    with open(data_path, "r", encoding="utf-8") as f:
+        cot: dict = json.load(f)
+    mapping_lst = []
+    for i in cot.keys():
+        val: dict = cot.get(i)
+        name: str = val["name"]
+        name = name.split(".")[0]
+        i = i.replace("img", "")
+        mapping_lst.append((i, name))
+    return mapping_lst

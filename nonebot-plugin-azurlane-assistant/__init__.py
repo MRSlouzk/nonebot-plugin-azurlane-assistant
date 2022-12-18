@@ -10,7 +10,7 @@ from nonebot.log import logger
 from .modules import build_simulator as bs
 from .modules.utils import *
 from .modules.japan_ship_contrast import japan_ship
-from .modules.jinghao import find_jinghao_img
+from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
 from .check_resources import update_res
 
@@ -36,7 +36,11 @@ async def _(matcher: Matcher ,arg: Message = CommandArg()):
         await matcher.finish("请输入>>井号榜 help<<查看具体用法")
     elif(len(args) == 1):
         if(args[0] == "help"):
-            await matcher.finish("")
+            msg = Message("序号表\n")
+            lst = await get_mapping_jh()
+            for i in lst:
+                msg += Message(f"{i[0]}:{i[1]}\n")
+            await matcher.finish(msg)
         else:
             try:
                 img = await find_jinghao_img(args[0])
