@@ -146,7 +146,8 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
 async def _(matcher: Matcher,arg: Message = CommandArg()):
     args = arg.extract_plain_text().split()
     if(len(args) == 0):
-        await matcher.finish("用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
+        await matcher.finish(
+            "用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
     elif(len(args) == 1):
         try:
             img = await open_ship_fleet_simulator(_brower, args[0])

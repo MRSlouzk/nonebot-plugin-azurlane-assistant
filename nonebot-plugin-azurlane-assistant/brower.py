@@ -1,11 +1,10 @@
 # Python Script Created by MRS
 from typing import Tuple
-from io import BytesIO
 
 from nonebot.log import logger
 from playwright.async_api import Browser, async_playwright, Playwright, Page, Error
-from PIL import Image
 
+# 本部分代码参考https://github.com/kexue-z/nonebot-plugin-htmlrender/blob/master/nonebot_plugin_htmlrender/browser.py进行编写
 async def start() -> Tuple[Browser, Playwright]:
     _playwright = await async_playwright().start()
     try:
@@ -20,7 +19,6 @@ async def shut(_brower: Browser, _playwright: Playwright):
     await _brower.close()
     _playwright.stop()
 
-# 本部分代码参考https://github.com/kexue-z/nonebot-plugin-htmlrender/blob/master/nonebot_plugin_htmlrender/browser.py进行编写
 async def install():
     import os
     import sys
@@ -54,12 +52,12 @@ async def open_ship_fleet_simulator(
     """
     截图舰队模拟器
     :param _brower:浏览器
-    :param code:
-    :param args:
-    :param simulator_type:
-    :return:
+    :param code:舰队编码
+    :param simulator_type:模拟器类型
+    :return:截图
     """
-    if(not _brower): raise Exception("未安装playwright,无法使用本功能")
+    if(not code.isalnum()): raise Exception("舰队编码不合法")
+    if(not _brower): raise Exception("未安装playwright或者playwright未正常启动,无法使用本功能")
     if(simulator_type == "bwiki"):
         url = "https://wiki.biligame.com/blhx/%E8%88%B0%E9%98%9F%E6%A8%A1%E6%8B%9F%E5%99%A8"
     elif(simulator_type == "x94fujo6rpg"):
@@ -69,7 +67,14 @@ async def open_ship_fleet_simulator(
     page = await _brower.new_page(java_script_enabled=True, viewport={"width": 1920, "height": 1080}, is_mobile=False)
     await page.goto(url)
     await page.fill("//textarea[@id=\"fleetdata\"]", code)
-    await page.click("//button[@id=\"loadDataByID\"]")
+
+    async with page.expect_console_message() as console_info:
+        await page.click("//button[@id=\"loadDataByID\"]")
+    msg = await console_info.value
+    if("save key" not in msg.text):
+        await page.close()
+        raise Exception("舰队数据加载失败, 请检查编码正确性")
+
     await page.wait_for_load_state("domcontentloaded")
     res = await page.query_selector("//*[@id=\"AzurLaneFleetApp\"]/div/div[2]")
     await res.scroll_into_view_if_needed()
