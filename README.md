@@ -93,7 +93,7 @@ _✨ 基于 NoneBot2 的碧蓝航线辅助插件 ✨_
 
 ## 🚧预定计划
 ### 基础功能
-模拟大建（使用纯代码+json数据下载解决）  
+模拟大建
 舰队编码解码器（类似于wiki的[舰队模拟器](https://wiki.biligame.com/blhx/舰队模拟器?AFLD=&UID=1774065779&name=13（12）船打通全碧蓝&page=A2102B7094E5A6253D2FAE9FDB79B379&type=综合)）  
 井号榜查阅  
 官方更新推送  
@@ -101,3 +101,11 @@ _✨ 基于 NoneBot2 的碧蓝航线辅助插件 ✨_
 ### 进阶功能
 各种数据的计算（参考[碧蓝公式合计](https://wiki.biligame.com/blhx/%E5%85%AC%E5%BC%8F%E5%90%88%E9%9B%86)）  
 wiki链接跳转
+
+## 🐛 已知问题
+1.非windows系统使用建造模拟器会导致截图时出现乱码  
+解决方案:先用locale -a确认系统内有"zh_CN",然后安装中文字体(centos:yum groupinstall Fonts)  
+2.启动playwright时报错缺少依赖  
+解决方案:https://haruka-bot.sk415.icu/faq.html#playwright-%E4%BE%9D%E8%B5%96%E4%B8%8D%E5%85%A8  
+3.启动时资源文件无法同步  
+解决方案:大多数是因为连接超时所导致的,推荐使用科学上网,后续会考虑制作镜像
