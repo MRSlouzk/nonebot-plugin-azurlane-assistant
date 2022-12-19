@@ -1,4 +1,8 @@
 # Python Script Created by MRS
+from typing import Optional
+
+from playwright.async_api import Browser, Playwright
+
 name = "nonebot-plugin-azurlane-assistant"
 
 from nonebot import on_command, get_driver
@@ -13,21 +17,41 @@ from .modules.japan_ship_contrast import japan_ship
 from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
 from .check_resources import update_res
+from .config import config
+from .brower import start, shut
 
 driver = get_driver()
+_brower: Optional[Browser] = None
+_playwright: Optional[Playwright] = None
 @driver.on_startup
 async def _():
     from httpx._exceptions import TimeoutException
     logger.info("正在更新资源文件...")
-    # await update_res()
-    # logger.info("资源文件更新完成")
     try:
         await update_res()
         logger.info("资源文件更新完成")
     except TimeoutException:
         logger.error("文件下载超时,请检查代理设置")
+        return
     except Exception as e:
         logger.error(e)
+        return
+    if(config.playwright_on):
+        global _brower, _playwright
+        logger.info("正在启动playwright...")
+        (_brower, _playwright) = await start()
+    else:
+        logger.warning("配置文件中已禁用playwright, 会导致\"舰队模拟器\"等功能无法使用")
+
+@driver.on_shutdown
+async def _():
+    logger.info("正在关闭playwright...")
+    global _playwright, _brower
+    try:
+        await shut(_brower, _playwright)
+    except Exception as e:
+        logger.error(e)
+        logger.warning("playwright关闭失败!请直接kill本进程")
 
 @on_command("井号榜").handle()
 async def _(matcher: Matcher ,arg: Message = CommandArg()):

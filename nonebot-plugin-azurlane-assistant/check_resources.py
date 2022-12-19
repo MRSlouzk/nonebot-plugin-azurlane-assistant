@@ -1,13 +1,10 @@
 # Python Script Created by MRS
-from nonebot import get_driver
 from nonebot.log import logger
-from nonebot.adapters import Adapter
 
-import asyncio, os, json
+import os, json
 import hashlib
 
 from .modules.utils import get_content
-from .config import config
 
 DATA_PATH = "./data/azurlane/"
 
