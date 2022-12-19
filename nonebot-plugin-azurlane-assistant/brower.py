@@ -17,7 +17,7 @@ async def start() -> Tuple[Browser, Playwright]:
 async def shut(_brower: Browser, _playwright: Playwright):
     assert _brower and _playwright
     await _brower.close()
-    _playwright.stop()
+    await _playwright.stop()
 
 async def install():
     import os
@@ -51,10 +51,12 @@ async def open_ship_fleet_simulator(
     ) -> bytes:
     """
     截图舰队模拟器
-    :param _brower:浏览器
-    :param code:舰队编码
-    :param simulator_type:模拟器类型
-    :return:截图
+
+    :param _brower: 浏览器
+    :param code: 舰队编码
+    :param simulator_type: 模拟器类型
+    :return: 截图
+    :exception: 舰队编码不合法|舰队数据加载失败|暂不支持AzureLaneFleet
     """
     if(not code.isalnum()): raise Exception("舰队编码不合法")
     if(not _brower): raise Exception("未安装playwright或者playwright未正常启动,无法使用本功能")
@@ -64,7 +66,7 @@ async def open_ship_fleet_simulator(
         raise Exception("因为技术性问题,暂不支持x94fujo6rpg制作的AzureLaneFleet舰队模拟器解析,请见谅")
     else:
         url = "https://wiki.biligame.com/blhx/%E8%88%B0%E9%98%9F%E6%A8%A1%E6%8B%9F%E5%99%A8"
-    page = await _brower.new_page(java_script_enabled=True, viewport={"width": 1920, "height": 1080}, is_mobile=False)
+    page = await _brower.new_page(java_script_enabled=True, viewport={"width": 1920, "height": 1080}, is_mobile=False, locale="zh-CN")
     await page.goto(url)
     await page.fill("//textarea[@id=\"fleetdata\"]", code)
 
@@ -76,7 +78,7 @@ async def open_ship_fleet_simulator(
         raise Exception("舰队数据加载失败, 请检查编码正确性")
 
     await page.wait_for_load_state("domcontentloaded")
-    res = await page.query_selector("//*[@id=\"AzurLaneFleetApp\"]/div/div[2]")
+    res = await page.query_selector("//*[@id=\"AzurLaneFleetApp\"]/div") #//*[@id=\"AzurLaneFleetApp\"]/div/div[2]
     await res.scroll_into_view_if_needed()
     box = await res.bounding_box()
     img = await page.screenshot(type="png", clip=box)

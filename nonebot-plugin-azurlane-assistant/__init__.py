@@ -37,22 +37,27 @@ async def _():
     except Exception as e:
         logger.error(e)
         return
+
     if(config.playwright_on):
         global _brower, _playwright
         logger.info("正在启动playwright...")
-        (_brower, _playwright) = await start()
+        try:
+            (_brower, _playwright) = await start()
+        except Exception as e:
+            logger.error(e)
     else:
         logger.warning("配置文件中已禁用playwright, 会导致\"舰队模拟器\"等功能无法使用")
 
 @driver.on_shutdown
 async def _():
-    logger.info("正在关闭playwright...")
-    global _playwright, _brower
-    try:
-        await shut(_brower, _playwright)
-    except Exception as e:
-        logger.error(e)
-        logger.warning("playwright关闭失败!请直接kill本进程")
+    if(config.playwright_on):
+        logger.info("正在关闭playwright...")
+        global _playwright, _brower
+        try:
+            await shut(_brower, _playwright)
+        except Exception as e:
+            logger.error(e)
+            logger.warning("playwright关闭失败!若卡死请直接kill本进程")
 
 @on_command("井号榜").handle()
 async def _(matcher: Matcher ,arg: Message = CommandArg()):
@@ -145,9 +150,10 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
 @on_command("舰队模拟器", permission=SUPERUSER).handle()
 async def _(matcher: Matcher,arg: Message = CommandArg()):
     args = arg.extract_plain_text().split()
+    global _brower
     if(len(args) == 0):
         await matcher.finish(
-            "用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
+            "用法:>>舰队模拟器 生成编码 [模拟器种类(bwiki或x94fujo6rpg)]<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
     elif(len(args) == 1):
         try:
             img = await open_ship_fleet_simulator(_brower, args[0])
@@ -162,4 +168,4 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
             await matcher.finish(str(e))
     else:
         await matcher.finish(
-            "用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
+            "用法:>>舰队模拟器 生成编码 [模拟器种类(bwiki或x94fujo6rpg)]<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")

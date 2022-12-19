@@ -40,7 +40,7 @@ async def update_res():
             with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
                 f.write(img)
     else:
-        def download():
+        async def download():
             img_url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
             img_c = await get_content(img_url, wanted_type="img")
             with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
@@ -53,6 +53,6 @@ async def update_res():
                 if hashlib.md5(open(DATA_PATH + "img/jinghao_rank/" + name, "rb").read()).hexdigest() == raw_hash:
                     continue
                 else:
-                    download()
+                    await download()
             except FileNotFoundError:
-                download()
+                await download()
