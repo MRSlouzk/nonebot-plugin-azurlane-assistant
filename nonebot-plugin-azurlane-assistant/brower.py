@@ -15,9 +15,6 @@ async def start() -> Tuple[Browser, Playwright]:
         _brower = await _playwright.chromium.launch(headless=True)
     return (_brower, _playwright)
 
-async def get_brow(_brower: Browser) -> Browser:
-    return _brower if _brower and _brower.is_connected() else await start()
-
 async def shut(_brower: Browser, _playwright: Playwright):
     assert _brower and _playwright
     await _brower.close()
@@ -48,7 +45,20 @@ async def install():
     if not success:
         logger.error("浏览器更新失败, 请检查网络连通性")
 
-async def open_ship_fleet_simulator(_brower: Browser, code: str, *args, simulator_type: str = "bwiki") -> bytes:
+async def open_ship_fleet_simulator(
+        _brower: Browser,
+        code: str,
+        *args,
+        simulator_type: str = "bwiki"
+    ) -> bytes:
+    """
+    截图舰队模拟器
+    :param _brower:浏览器
+    :param code:
+    :param args:
+    :param simulator_type:
+    :return:
+    """
     if(not _brower): raise Exception("未安装playwright,无法使用本功能")
     if(simulator_type == "bwiki"):
         url = "https://wiki.biligame.com/blhx/%E8%88%B0%E9%98%9F%E6%A8%A1%E6%8B%9F%E5%99%A8"
@@ -60,9 +70,10 @@ async def open_ship_fleet_simulator(_brower: Browser, code: str, *args, simulato
     await page.goto(url)
     await page.fill("//textarea[@id=\"fleetdata\"]", code)
     await page.click("//button[@id=\"loadDataByID\"]")
-    await page.wait_for_function("loadDataByID")
+    await page.wait_for_load_state("domcontentloaded")
     res = await page.query_selector("//*[@id=\"AzurLaneFleetApp\"]/div/div[2]")
     await res.scroll_into_view_if_needed()
     box = await res.bounding_box()
     img = await page.screenshot(type="png", clip=box)
+    await page.close()
     return img

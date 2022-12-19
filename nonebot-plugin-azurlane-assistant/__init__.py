@@ -1,6 +1,7 @@
 # Python Script Created by MRS
 from typing import Optional
 
+from nonebot.permission import SUPERUSER
 from playwright.async_api import Browser, Playwright
 
 name = "nonebot-plugin-azurlane-assistant"
@@ -18,7 +19,7 @@ from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
 from .check_resources import update_res
 from .config import config
-from .brower import start, shut
+from .brower import start, shut, open_ship_fleet_simulator
 
 driver = get_driver()
 _brower: Optional[Browser] = None
@@ -140,3 +141,24 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
         await matcher.finish("和谐名:{},中文原名:{},和谐名拼音:{}".format(info[0], info[1], info[2]))
     else:
         await matcher.finish("参数格式错误,请重新输入")
+
+@on_command("舰队模拟器", permission=SUPERUSER).handle()
+async def _(matcher: Matcher,arg: Message = CommandArg()):
+    args = arg.extract_plain_text().split()
+    if(len(args) == 0):
+        await matcher.finish("用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
+    elif(len(args) == 1):
+        try:
+            img = await open_ship_fleet_simulator(_brower, args[0])
+            await matcher.finish(MessageSegment.image(img))
+        except Exception as e:
+            await matcher.finish(str(e))
+    elif(len(args) == 2):
+        try:
+            img = await open_ship_fleet_simulator(_brower, args[0], simulator_type=args[1])
+            await matcher.finish(MessageSegment.image(img))
+        except Exception as e:
+            await matcher.finish(str(e))
+    else:
+        await matcher.finish(
+            "用法:>>舰队模拟器 生成编码 模拟器种类(bwiki或x94fujo6rpg)<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
