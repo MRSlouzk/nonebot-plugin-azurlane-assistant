@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name='nonebot-plugin-azurlane-assistant',
     version='0.0.1',
-    packages=find_packages(),
+    packages=['nonebot-plugin-azurlane-assistant', 'nonebot-plugin-azurlane-assistan.modules'],
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/MRSlouzk/nonebot-plugin-azurlane-assistant/',
