@@ -13,5 +13,6 @@ setup(
     license='MIT',
     author='MRSlouzk',
     author_email='mrslouzk@qq.com',
-    description='碧蓝航线辅助插件'
+    description='碧蓝航线辅助插件',
+    install_requires=['nonebot-adapter-onebot>=2.0.0-beta.2,<3.0.0', 'nonebot2>=2.0.0-beta.1,<3.0.0', 'httpx>=0.23.1', 'playwright>=1.28.0']
 )
