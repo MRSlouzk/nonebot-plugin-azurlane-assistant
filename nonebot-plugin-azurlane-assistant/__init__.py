@@ -90,8 +90,8 @@ async def _(bot: Bot, event: MessageEvent,matcher: Matcher ,arg: Message = Comma
         elif (cn_name == "特型"):
             return "tx"
         elif (cn_name == "限时"):
-            # return "xd"
-            await matcher0.finish("目前暂不支持限时池抽取")
+            return "xd"
+            # await matcher0.finish("目前暂不支持限时池抽取")
         else:
             await matcher0.finish("参数错误，仅支持轻型/重型/特型/限时池")
     args = arg.extract_plain_text().split()
@@ -118,6 +118,10 @@ async def _(bot: Bot, event: MessageEvent,matcher: Matcher ,arg: Message = Comma
         times = times + 1
         sname = ship.get("name")
         quality = ship.get("quality")
+        if(b_type == "xd"): quality = ship.get("rarity")
+        if(sname is None):
+            msg_lst.append(Message(f"第{times}次抽取\n未抽到任何UP船~"))
+            break
         msg_lst.append(Message(f"第{times}次抽取\n名称:{sname}\n品质:{quality}"))
     msg_lst.append(Message("池子数据均来自碧蓝航线wiki\nhttps://wiki.biligame.com/blhx/%E5%BB%BA%E9%80%A0%E6%A8%A1%E6%8B%9F%E5%99%A8"))
     await send_forward_msg(bot, event, "大建模拟器", bot.self_id, msg_lst)
