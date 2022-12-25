@@ -80,6 +80,7 @@ async def open_ship_fleet_simulator(
     await page.wait_for_load_state("domcontentloaded")
     res = await page.query_selector("//*[@id=\"AzurLaneFleetApp\"]/div") #//*[@id=\"AzurLaneFleetApp\"]/div/div[2]
     await res.scroll_into_view_if_needed()
+    await res.evaluate("document.getElementsByClassName(\"row celling-box\")[0].style.display='none'") # 移除顶部菜单栏(截图时会被截图到)
     box = await res.bounding_box()
     img = await page.screenshot(type="png", clip=box)
     await page.close()
