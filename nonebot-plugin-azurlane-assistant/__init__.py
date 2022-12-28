@@ -122,7 +122,14 @@ async def _(bot: Bot, event: MessageEvent,matcher: Matcher ,arg: Message = Comma
         if(sname is None):
             msg_lst.append(Message(f"第{times}次抽取\n未抽到任何UP船~"))
             break
-        msg_lst.append(Message(f"第{times}次抽取\n名称:{sname}\n品质:{quality}"))
+        if(config.download_icons):
+            try:
+                msg_lst.append(Message(f"第{times}次抽取\n名称:{sname}\n品质:{quality}") + MessageSegment.image(f"./data/azurlane/ship_icons/{sname}.png"))
+            except Exception as e:
+                logger.error(e)
+                msg_lst.append(Message(f"第{times}次抽取\n名称:{sname}\n品质:{quality}"))
+        else:
+            msg_lst.append(Message(f"第{times}次抽取\n名称:{sname}\n品质:{quality}"))
     msg_lst.append(Message("池子数据均来自碧蓝航线wiki\nhttps://wiki.biligame.com/blhx/%E5%BB%BA%E9%80%A0%E6%A8%A1%E6%8B%9F%E5%99%A8"))
     await send_forward_msg(bot, event, "大建模拟器", bot.self_id, msg_lst)
 

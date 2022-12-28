@@ -1,16 +1,19 @@
 # Python Script Created by MRS
+import json
+
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, PrivateMessageEvent
 from typing import List, Union
 
 import httpx as hx
 
-from ..config import config
+from .config import config
 async def parse(resp: hx.Response, *args, option_type: str = "str") -> Union[dict, str, bytes]:
     header = resp.headers.get("content-type")
     if("html" in header):
         resp.encoding="utf-8"
         return resp.text
     elif("json" in header):
+        if("text" in header): return json.loads(resp.text)
         resp.encoding="utf-8"
         return resp.json()
     elif ("image" in header):
@@ -69,7 +72,7 @@ async def send_forward_msg(
     > 发送合并转发消息
     :参数:
       * `bot: Bot`: bot 实例
-      * `event: GroupMessageEvent`: 群聊事件
+      * `event: Event`: 事件
       * `name: str`: 名字
       * `uin: str`: qq号
       * `msgs: List[Message]`: 消息列表
