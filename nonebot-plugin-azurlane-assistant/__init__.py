@@ -1,5 +1,5 @@
 # Python Script Created by MRS
-from typing import Optional
+from typing import Optional, List
 
 from nonebot.permission import SUPERUSER
 from playwright.async_api import Browser, Playwright
@@ -8,12 +8,12 @@ name = "nonebot-plugin-azurlane-assistant"
 
 from nonebot import on_command, get_driver
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment, Bot
 from nonebot.params import CommandArg
 from nonebot.log import logger
 
 from .modules import build_simulator as bs
-from .modules.utils import *
+from .utils import *
 from .modules.japan_ship_contrast import japan_ship
 from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
@@ -180,3 +180,9 @@ async def _(matcher: Matcher,arg: Message = CommandArg()):
     else:
         await matcher.finish(
             "用法:>>舰队模拟器 生成编码 [模拟器种类(bwiki或x94fujo6rpg)]<<, 输出:舰队模拟器结果\n注意:舰队模拟器目前因为技术原因仅支持bwiki生成的,x94fujo6rpg的因为一些技术性问题适配有一定难度(两者代码不通用)")
+
+from nonebot import require
+reset = require("nonebot_plugin_apscheduler").scheduler
+@reset.scheduled_job("cron", hour=0, minute=0, second=0)
+async def _():
+    await check_resources()
