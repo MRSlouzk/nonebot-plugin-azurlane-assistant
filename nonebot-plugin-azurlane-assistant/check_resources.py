@@ -136,6 +136,8 @@ class ResouceChecker(object):
         :param hash_file: 哈希效验文件
         :return:
         """
+        file_path = Path(cls.data_path + str(file_path))
+        hash_file = Path(cls.data_path + str(hash_file))
         with hash_file.open("r", encoding="utf-8") as f:
             hash_dict: dict = json.load(f)
         if(len(hash_dict.keys()) != len(os.listdir(file_path))):
@@ -166,11 +168,8 @@ async def check_resources():
     pool = rc.update_data("pool.json", path=PurePath("data/pool.json"), mode="file", is_return=False)
     jsn = rc.update_data("japan_ship_name.json", path=PurePath("data/japan_ship_name.json"), mode="file", is_return=False)
     sicon = rc.update_data("ship_icon.json", path=PurePath("data/ship_icon.json"), mode="file")
-    if(jinghao[1] and pool and jsn and sicon[1]):
-        logger.debug("数据文件无须更新~")
-        return
-    else: logger.debug("-----数据文件更新完成-----")
-    if(jinghao[1]):
+    if(not jinghao[1]):
+        logger.debug("---开始更新井号榜---")
         pathname_lst = []
         name_lst = []
         for items in jinghao[0].values():
@@ -179,74 +178,85 @@ async def check_resources():
             pathname_lst.append("img/jinghao_rank/" + name)
 
         rc.download_imgs(pathname_lst, mode="file", path=PurePath("img/jinghao_rank/"), name=name_lst)
-    # TODO
+        logger.debug("---井号榜更新完成---")
+    else:
+        logger.debug("---开始井号榜哈希效验---")
+        res = rc.hash_verify(file_path=Path("img/jinghao_rank/"), hash_file=Path("data/jinghao_rank.json"))
+        if(res): logger.debug("---井号榜哈希效验通过---")
+        else:
+            for items in res:
+                rc.download_imgs(items, mode="file", path=PurePath("img/jinghao_rank/"), name=items.name)
+            logger.debug("---井号榜哈希效验不通过，已更新---")
+    if(jinghao[1] and pool and jsn and sicon[1]):
+        logger.debug("其余数据文件无须更新~")
+        return
 
     logger.info("======资源文件检查无误======")
 
-async def update_res():
-    async def get_json(icon_num: int):
-        jinghao: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/jinghao_rank.json")
-        build_pool: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/pool.json")
-        japan_ship: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/japan_ship_name.json")
-        ship_icon: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/ship_icon.json")
-        (jinghao, build_pool, japan_ship, ship_icon) = json.loads(jinghao), json.loads(build_pool), json.loads(japan_ship), json.loads(ship_icon)
-        jinghao: dict
-        ship_icon: dict
-
-        with open(DATA_PATH + "data/jinghao_rank.json", "w", encoding="utf-8") as f0:
-            json.dump((jinghao), f0, ensure_ascii=False, indent=4)
-        with open(DATA_PATH + "data/pool.json", "w", encoding="utf-8") as f1:
-            json.dump(build_pool, f1, ensure_ascii=False, indent=4)
-        with open(DATA_PATH + "data/japan_ship_name.json", "w", encoding="utf-8") as f2:
-            json.dump(japan_ship, f2, ensure_ascii=False, indent=4)
-        if(ship_icon["num"] != icon_num):
-            with open(DATA_PATH + "data/ship_icon.json", "w", encoding="utf-8") as f2:
-                json.dump(ship_icon, f2, ensure_ascii=False, indent=4)
-        return jinghao
-
-    if(not os.path.exists(DATA_PATH)):
-        logger.warning("资源文件夹不存在，正在创建...")
-        os.makedirs(DATA_PATH)
-        os.makedirs(DATA_PATH + "data/")
-        os.makedirs(DATA_PATH + "img/jinghao_rank")
-
-        logger.info("开始下载数据文件")
-        with open(DATA_PATH + "data/ship_icon.json", "r", encoding="utf-8") as f:
-            cot = json.load(f)
-        jh = await get_json(int(cot["num"]))
-        logger.info("数据文件下载完成")
-
-        for items in jh.values():
-            name = items["name"]
-            url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
-            img = await get_content(url)
-            with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
-                f.write(img)
-    else:
-        async def download_jinghao():
-            img_url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
-            img_c = await get_content(img_url, wanted_type="img")
-            with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
-                f.write(img_c)
-        async def download_icons():
-            icon_url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/ship_icon.json"
-            icon_c = await get_content(icon_url)
-            with open(DATA_PATH + "data/ship_icon.json", "w", encoding="utf-8") as f:
-                json.dump(json.loads(icon_c), f, ensure_ascii=False, indent=4)
-
-        logger.info("开始下载数据文件")
-        with open(DATA_PATH + "data/ship_icon.json", "r", encoding="utf-8") as f:
-            cot = json.load(f)
-        jh = await get_json(int(cot["num"]))
-        logger.info("数据文件下载完成")
-
-        for items in jh.values():
-            name = items["name"]
-            raw_hash = items["hash"]
-            try:
-                if hashlib.md5(open(DATA_PATH + "img/jinghao_rank/" + name, "rb").read()).hexdigest() == raw_hash:
-                    continue
-                else:
-                    await download_jinghao()
-            except FileNotFoundError:
-                await download_jinghao()
+# async def update_res():
+#     async def get_json(icon_num: int):
+#         jinghao: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/jinghao_rank.json")
+#         build_pool: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/pool.json")
+#         japan_ship: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/japan_ship_name.json")
+#         ship_icon: str = await get_content("https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/ship_icon.json")
+#         (jinghao, build_pool, japan_ship, ship_icon) = json.loads(jinghao), json.loads(build_pool), json.loads(japan_ship), json.loads(ship_icon)
+#         jinghao: dict
+#         ship_icon: dict
+#
+#         with open(DATA_PATH + "data/jinghao_rank.json", "w", encoding="utf-8") as f0:
+#             json.dump((jinghao), f0, ensure_ascii=False, indent=4)
+#         with open(DATA_PATH + "data/pool.json", "w", encoding="utf-8") as f1:
+#             json.dump(build_pool, f1, ensure_ascii=False, indent=4)
+#         with open(DATA_PATH + "data/japan_ship_name.json", "w", encoding="utf-8") as f2:
+#             json.dump(japan_ship, f2, ensure_ascii=False, indent=4)
+#         if(ship_icon["num"] != icon_num):
+#             with open(DATA_PATH + "data/ship_icon.json", "w", encoding="utf-8") as f2:
+#                 json.dump(ship_icon, f2, ensure_ascii=False, indent=4)
+#         return jinghao
+#
+#     if(not os.path.exists(DATA_PATH)):
+#         logger.warning("资源文件夹不存在，正在创建...")
+#         os.makedirs(DATA_PATH)
+#         os.makedirs(DATA_PATH + "data/")
+#         os.makedirs(DATA_PATH + "img/jinghao_rank")
+#
+#         logger.info("开始下载数据文件")
+#         with open(DATA_PATH + "data/ship_icon.json", "r", encoding="utf-8") as f:
+#             cot = json.load(f)
+#         jh = await get_json(int(cot["num"]))
+#         logger.info("数据文件下载完成")
+#
+#         for items in jh.values():
+#             name = items["name"]
+#             url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
+#             img = await get_content(url)
+#             with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
+#                 f.write(img)
+#     else:
+#         async def download_jinghao():
+#             img_url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/img/jinghao_rank/" + name
+#             img_c = await get_content(img_url, wanted_type="img")
+#             with open(DATA_PATH + "img/jinghao_rank/" + name, "wb") as f:
+#                 f.write(img_c)
+#         async def download_icons():
+#             icon_url = "https://raw.githubusercontent.com/MRSlouzk/nonebot-plugin-azurlane-assistant-data/main/data/ship_icon.json"
+#             icon_c = await get_content(icon_url)
+#             with open(DATA_PATH + "data/ship_icon.json", "w", encoding="utf-8") as f:
+#                 json.dump(json.loads(icon_c), f, ensure_ascii=False, indent=4)
+#
+#         logger.info("开始下载数据文件")
+#         with open(DATA_PATH + "data/ship_icon.json", "r", encoding="utf-8") as f:
+#             cot = json.load(f)
+#         jh = await get_json(int(cot["num"]))
+#         logger.info("数据文件下载完成")
+#
+#         for items in jh.values():
+#             name = items["name"]
+#             raw_hash = items["hash"]
+#             try:
+#                 if hashlib.md5(open(DATA_PATH + "img/jinghao_rank/" + name, "rb").read()).hexdigest() == raw_hash:
+#                     continue
+#                 else:
+#                     await download_jinghao()
+#             except FileNotFoundError:
+#                 await download_jinghao()

@@ -17,7 +17,7 @@ from .modules.utils import *
 from .modules.japan_ship_contrast import japan_ship
 from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
-from .check_resources import update_res
+from .check_resources import check_resources
 from .config import config
 from .brower import start, shut, open_ship_fleet_simulator
 
@@ -29,7 +29,7 @@ async def _():
     from httpx._exceptions import TimeoutException
     logger.info("正在更新资源文件...")
     try:
-        await update_res()
+        await check_resources()
         logger.info("资源文件更新完成")
     except TimeoutException:
         logger.error("文件下载超时,请检查代理设置")
