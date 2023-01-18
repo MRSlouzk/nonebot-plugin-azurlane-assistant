@@ -1,11 +1,11 @@
 # Python Script Created by MRS
 from typing import Optional, List
 
-from nonebot.permission import SUPERUSER
 from playwright.async_api import Browser, Playwright
 
 name = "nonebot-plugin-azurlane-assistant"
 
+from nonebot.permission import SUPERUSER
 from nonebot import on_command, get_driver
 from nonebot.matcher import Matcher
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment, Bot
@@ -13,10 +13,10 @@ from nonebot.params import CommandArg
 from nonebot.log import logger
 
 from .modules import build_simulator as bs
-from .utils import *
 from .modules.japan_ship_contrast import japan_ship
 from .modules.jinghao import find_jinghao_img, get_mapping_jh
 
+from .utils import *
 from .check_resources import check_resources
 from .config import config
 from .brower import start, shut, open_ship_fleet_simulator

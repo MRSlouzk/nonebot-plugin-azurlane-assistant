@@ -51,5 +51,3 @@ if __name__ == '__main__':
     import asyncio
     lst = asyncio.run(build_simulate("qx", times=10))
     print(lst)
-    # for i in range(0, 2):
-    #     print("a")
